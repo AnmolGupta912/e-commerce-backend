@@ -2,46 +2,55 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 
-const userSchema = Schema(
+const userSchema = new Schema(
     {
         email:{
             type: String,
             unique: true,
             required: true,
         },
-        username: {
+        name:{
             type: String,
             require: true
         },
         password: {
             type: String,
             required: true
+        },
+        wishList: [
+            {
+                type: Schema.Types.ObjectId,
+                ref: "Product"
+            }
+        ],
+        refreshToken: {
+            type: String
         }
-        
     },
     {
-        timestamp: true
+        timestamps: true
     }
 )
 
-// 
+
 userSchema.pre("save", async function (next) {
     if (!this.isModified("password")){
         return next()
     }
     this.password = await bcrypt.hash(this.password, 10)
+    next()
 })
 
-userSchema.method.isPasswordCorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
     return bcrypt.compare(password, this.password)
 }
 
-userSchema.method.generatorAcessToken =  function () {
+userSchema.methods.generatorAcessToken =  function () {
     return jwt.sign(
         {
             _id: this._id,
             email: this.email,
-            username: this.username,
+            username: this.name,
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
@@ -50,7 +59,7 @@ userSchema.method.generatorAcessToken =  function () {
     )
 }
 
-userSchema.method.generatorRefreshToken = function () {
+userSchema.methods.generatorRefreshToken = function () {
     return jwt.sign(
         {
             _id: this._id,
