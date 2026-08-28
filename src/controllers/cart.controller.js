@@ -33,6 +33,31 @@ const toggleCartStatus = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, updatedCart, "Cart status toggled successfully"));
 })
 
+const getCartById = asyncHandler(async (req, res) => {
+    const cartId = req.params.cartId;
 
+    if (!cartId) {
+        throw new ApiError(400, "Bad request: Missing required parameters!!!");
+    }
 
-export { createCart, toggleCartStatus };
+    const cart = await Cart.findById(cartId);
+
+    if (!cart) {
+        throw new ApiError(404, "Cart not found !!!");
+    }
+
+    return res.status(200).json(new ApiResponse(200, cart, "Cart retrieved successfully"));
+})
+
+const clearCart = asyncHandler(async (req, res) => {
+    const cartId = req.params.cartId;
+
+    if (!cartId) {
+        throw new ApiError(400, "Bad request: Missing required parameters!!!");
+    }
+
+    await Cart.findByIdAndDelete(cartId);
+    return res.status(200).json(new ApiResponse(200, null, "Cart cleared successfully"));
+});
+
+export { createCart, toggleCartStatus, getCartById, clearCart };
