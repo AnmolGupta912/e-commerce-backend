@@ -7,14 +7,7 @@ import {Order} from "../models/order.model.js";
 // createPayment()
 // getPaymentByOrder()
 // updatePaymentStatus()
-
-const createPayment = asyncHandler(async (req, res) => {
-    // const { orderId, amount, method, transactionId } = req.body;
-
-    const { method, transactionId } = req.body;
-    const orderId = req.params.orderId;
-
-    // apply discounts, taxes, and other calculations to the order amount before creating the payment
+export const calculateOrderAmount = async (orderId) => {
     const order = await Order.aggregate([
         {
             $match: { _id: mongoose.Types.ObjectId(orderId) }
@@ -34,6 +27,20 @@ const createPayment = asyncHandler(async (req, res) => {
             }
         }
     ])
+
+    return order[0];
+}
+    
+
+
+const createPayment = asyncHandler(async (req, res) => {
+    // const { orderId, amount, method, transactionId } = req.body;
+
+    const { method, transactionId } = req.body;
+    const orderId = req.params.orderId;
+
+    // apply discounts, taxes, and other calculations to the order amount before creating the payment
+    const order = await calculateOrderAmount(orderId);
 
 
     if (!order[0]) {
