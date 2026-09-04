@@ -1,7 +1,7 @@
 import mongoose, {Schema}  from "mongoose";
 
 
-const orderSchema = Schema(
+const orderSchema = new Schema(
     {
         userId: {
             type: Schema.Types.ObjectId,
@@ -9,23 +9,24 @@ const orderSchema = Schema(
         },
         total: {
             type: Number,
-            default: 0
+            required: true
         },
         status: {
             type: String,
-            required: true
+            default: "pending"
         },
         subscriptionId: {
             type: Schema.Types.ObjectId,
             ref: "Subscription"
         },
         placedAt: {
-            type: Date(),
+            type: Date,
             required: true
+
         }
     },
     {
-        timestamp: true
+        timestamps: true
     }
 )
 
