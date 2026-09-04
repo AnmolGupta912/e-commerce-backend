@@ -49,7 +49,12 @@ const createProduct = asyncHandler(async (req, res) => {
 
 const getAllProducts = asyncHandler(async (req, res) => {
     try {
-        const products = await Product.find();
+        const options = {
+            page: req.query.page || 1,
+            limit: req.query.limit || 10
+        };
+
+        const products = await Product.aggregatePaginate(Product.find(), options);
 
         if (!products) {
             throw new ApiError(500, "Failed to fetch all products!!!");

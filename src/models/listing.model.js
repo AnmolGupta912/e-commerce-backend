@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const listingSchema = Schema(
+
+const listingSchema = new Schema(
     {
         productId: {
             type: Schema.Types.ObjectId,
@@ -27,4 +29,8 @@ const listingSchema = Schema(
     }
 );
 
+listingSchema.plugin(mongooseAggregatePaginate);
+
 export const Listing = mongoose.model("Listing", listingSchema);
+
+// Listing.aggregatePaginate()
