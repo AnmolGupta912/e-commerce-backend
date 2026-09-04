@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const categorySchema = Schema(
+const categorySchema = new Schema(
     {
         //parentId references another category because your diagram allows nested categories.
         parentId: {
@@ -10,6 +10,10 @@ const categorySchema = Schema(
         name: {
             type: String,
             required: true
+        },
+        description: {
+            type: String,
+            default: ""
         }
     },
     {
