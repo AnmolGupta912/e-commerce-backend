@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
-const planSchema = Schema(
+
+const planSchema = new Schema(
     {
         name: {
             type: String,

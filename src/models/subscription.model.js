@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const subscriptionSchema = mongoose.Schema(
+const subscriptionSchema = new mongoose.Schema(
     {
         userId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -12,11 +12,14 @@ const subscriptionSchema = mongoose.Schema(
         },
         status: {
             type: String,
+            enum: ["active", "cancelled", "expired"],
+            default: "active"
         },
         renewAt: {
-            type: Date(),
+            type: Date,
             required: true
-        }
+        },
+        
     },
     {
         timestamp: true
