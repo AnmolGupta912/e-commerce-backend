@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-const cartItemSchema = Schema(
+const cartItemSchema = new Schema(
     {
         cartId: {
             type: Schema.Types.ObjectId,
@@ -21,5 +22,7 @@ const cartItemSchema = Schema(
         timestamps: true
     }
 );
+
+cartItemSchema.plugin(mongooseAggregatePaginate);
 
 export const CartItem = mongoose.model("CartItem", cartItemSchema);

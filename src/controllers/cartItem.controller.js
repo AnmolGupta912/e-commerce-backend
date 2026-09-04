@@ -61,13 +61,25 @@ const getCartItemsByCartId = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Bad request: Missing required parameters!!!");
     }
 
+    const options = {
+        page: req.query.page || 1,
+        limit: req.query.limit || 10,
+        sort: { createdAt: -1 }
+    };
+
     const cartItems = await CartItem.aggregate([
         {
             $match: { cartId: new mongoose.Types.ObjectId(cartId) }
         }
     ]);
 
-    return res.status(200).json(new ApiResponse(200, cartItems, "Cart items retrieved successfully"));
+    const paginatedCartItems = await CartItem.aggregatePaginate(cartItems, options);
+
+    if (!paginatedCartItems || paginatedCartItems.length === 0) {
+        throw new ApiError(404, "No cart items found for the given cartId!!!");
+    }
+
+    return res.status(200).json(new ApiResponse(200, paginatedCartItems, "Cart items retrieved successfully"));
 })
 
 export { createCartItem, deleteCartItem, updateCartItemQuantity, getCartItemsByCartId };
