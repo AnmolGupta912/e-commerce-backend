@@ -1,11 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
-const productSchema = Schema(
+const productSchema = new Schema(
     {
         categoryId: {
             type: Schema.Types.ObjectId,
             ref: "Category",
-            required: true
+            // required: true
         },
         name: {
             type: String,
@@ -13,6 +13,15 @@ const productSchema = Schema(
         },
         price: {
             type: Number,
+            default: 0,
+        },
+        description: {
+            type: String,
+            default: ""
+        },
+        productImage: {
+            type: String,
+            default: "",
             required: true
         }
     },
