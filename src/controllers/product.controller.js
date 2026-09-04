@@ -188,3 +188,12 @@ const deleteProductById = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to delete product!!!");
     }
 })
+
+export {
+    createProduct,
+    getAllProducts,
+    getProductById,
+    updateProductDetailsById,
+    updateProductImageById,
+    deleteProductById
+}
