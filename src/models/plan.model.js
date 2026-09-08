@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const planSchema = new Schema(
     {
@@ -20,5 +20,7 @@ const planSchema = new Schema(
         timestamps: true
     }
 );
+
+planSchema.plugin(mongooseAggregatePaginate);
 
 export const Plan = mongoose.model("Plan", planSchema);

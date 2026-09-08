@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const paymentSchema = Schema(
+const paymentSchema = new Schema(
     {
         orderId: {
             type: Schema.Types.ObjectId,
@@ -17,7 +17,8 @@ const paymentSchema = Schema(
         },
         status: {
             type: String,
-            required: true
+            enum: ["pending", "completed", "failed"],
+            default: "pending"
         },
         transactionId: {
             type: String

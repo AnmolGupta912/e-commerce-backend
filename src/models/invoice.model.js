@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const invoiceSchema = Schema(
+const invoiceSchema = new Schema(
     {
         orderId: {
             type: Schema.Types.ObjectId,
@@ -18,6 +18,10 @@ const invoiceSchema = Schema(
         },
         issuedAt: {
             type: Date,
+            required: true
+        },
+        taxAmount: {
+            type: Number,
             required: true
         }
     },

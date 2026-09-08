@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const returnSchema = Schema(
+const returnSchema = new Schema(
     {
         orderId: {
             type: Schema.Types.ObjectId,
@@ -18,7 +18,8 @@ const returnSchema = Schema(
         },
         status: {
             type: String,
-            required: true
+            enum: ["pending", "approved", "rejected"],
+            default: "pending"
         },
         returnedAt: {
             type: Date

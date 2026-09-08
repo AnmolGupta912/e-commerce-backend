@@ -1,27 +1,34 @@
 import mongoose, { Schema } from "mongoose";
 
-const shipmentSchema = Schema(
+const shipmentSchema = new Schema(
     {
         warehouseId: {
             type: Schema.Types.ObjectId,
             ref: "Warehouse",
             required: true
         },
-        carrier: {
-            type: String,
-            required: true
+        shippedAt: {
+            type: Date,
         },
         trackingNumber: {
-            type: String,
-            required: true
+            type: String
         },
         status: {
             type: String,
-            required: true
+            enum: ["pending", "shipped", "delivered"],
+            default: "pending"
         },
         orderId: {
             type: Schema.Types.ObjectId,
             ref: "Order",
+            required: true
+        },
+        deliveredAt: {
+            type: Date
+        },
+        sellerId: {
+            type: Schema.Types.ObjectId,
+            ref: "User",
             required: true
         }
     },

@@ -1,10 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 
-const cartSchema = Schema(
+const cartSchema = new Schema(
     {
-        status: {
+        status: { 
             type: String,
-            required: true
+            default: "active"
         },
         userId: {
             type: Schema.Types.ObjectId,
