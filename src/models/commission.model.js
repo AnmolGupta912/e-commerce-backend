@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-const commissionSchema = Schema(
+const commissionSchema = new Schema(
     {
         sellerId: {
             type: Schema.Types.ObjectId,

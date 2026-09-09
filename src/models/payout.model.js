@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const payoutSchema = Schema(
     {
@@ -24,4 +25,5 @@ const payoutSchema = Schema(
     }
 );
 
+payoutSchema.plugin(mongooseAggregatePaginate);
 export const Payout = mongoose.model("Payout", payoutSchema);
