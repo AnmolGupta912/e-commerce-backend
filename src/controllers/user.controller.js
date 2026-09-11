@@ -2,21 +2,21 @@ import { User } from "../models/user.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import jwt from "jsonwebtoken";
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken = user.generateAccessToken();
+    const accessToken =  user.generateAccessToken()
     const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
+    // console.log("user.refreshToken", user.refreshToken, "accessToken", accessToken);
+
 
     await user.save({ validateBeforeSave: false }); // by doing validation false we r tell mongoDB to ignore its custom validation like check requied field
     return { accessToken, refreshToken };
   } catch (error) {
-    throw new ApiError(
-      500,
-      "Something went wrong while generating the tokens!!!"
-    );
+    throw new ApiError(500, error.message ||"Something went wrong while generating tokens!!!");
   }
 };
 
@@ -27,13 +27,14 @@ const registerUser = asyncHandler(async (req, res) => {
   // if not create user
   // send the user in res without password and refresh token
 
+  // console.log("Route hit for register user");
   const { email, name, password } = req.body;
 
   if ([name, email, password].some((field) => field?.trim() === "")) {
     throw new ApiError(400, "all field are required !!!");
   }
 
-  const existedUser = await User.findOne(email);
+  const existedUser = await User.findOne({email});
 
   if (existedUser) {
     throw new ApiError(
@@ -46,15 +47,20 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
-  }).select("-password");
+  })
 
   if (!user) {
     throw new ApiError(502, "Something went wrong while creating user!!!");
   }
 
+  // const createdUser = await user.select("-password -wishList");
+    const createdUser = await User.findById(user._id).select(
+        "-password -refershToken"
+    )
+
   return res
     .status(201)
-    .json(new ApiResponse(201, user, "Successfully created the user!!!"));
+    .json(new ApiResponse(201, createdUser, "Successfully created the user!!!"));
 });
 
 const loginUser = asyncHandler(async (req, res) => {
@@ -160,9 +166,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const user = await User.findById(decodedToken?._id);
 
+  
+    
     if (!user || user.refreshToken !== incomingRefreshToken) {
-      throw new ApiError(401, "Invalid refresh token!!!");
+      throw new ApiError(401, error?.message ||"Invalid refresh token!!!");
     }
+
+
 
     const { accessToken, refreshToken } =
       await generateAccessTokenAndRefreshToken(user._id);
@@ -190,7 +200,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         )
       );
   } catch (error) {
-    throw new ApiError(401, "Invalid refresh token!!!");
+    throw new ApiError(401, error?.message ||"Invalid refresh token!!!");
   }
 });
 
@@ -262,13 +272,19 @@ const deleteUser = asyncHandler(async (req, res) => {
 const getUserProfile = asyncHandler(async (req, res) => {
   const userId = req.user?._id;
 
-  const user = await User.findById(userId).select("-password -refreshToken -wishList");
+  const user = await User.findById(userId)
+  console.log("user", user, "userId", userId)
+
 
   if (!user) {
     throw new ApiError(404, "User not found!!!");
   }
 
-  return res.status(200).json(new ApiResponse(200, user, "User profile retrieved successfully !!!"));
+  const createdUser = await User.findById(user._id).select(
+    "-password -refreshToken"
+  )
+
+  return res.status(200).json(new ApiResponse(200, createdUser, "User profile retrieved successfully !!!"));
 });
 
 export {
