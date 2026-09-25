@@ -10,7 +10,7 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
     const accessToken =  user.generateAccessToken()
     const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
-    // console.log("user.refreshToken", user.refreshToken, "accessToken", accessToken);
+    console.log("user.refreshToken", user.refreshToken, "accessToken", accessToken);
 
 
     await user.save({ validateBeforeSave: false }); // by doing validation false we r tell mongoDB to ignore its custom validation like check requied field
@@ -94,6 +94,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const { accessToken, refreshToken } =
     await generateAccessTokenAndRefreshToken(user._id);
+
+  
 
   const savedUser = await user.save({ validateBeforeSave: false });
 

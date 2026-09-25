@@ -12,49 +12,64 @@ const createProduct = asyncHandler(async (req, res) => {
     // set categoryId to the product if provided in the request body
     // return the product details in the response
 
-    const { name, price, description } = req.body;
-    const categoryId = req.body.categoryId || null; 
-    
-    if (!name || !price ) {
-        throw new ApiError(400, "Name and price are required fields!!!");
+    console.log("welcome to create product controller");
+
+    try {
+        const { name, price, description } = req.body;
+        const categoryId = req.body.categoryId || null;
+
+        if (!name || !price) {
+            throw new ApiError(400, "Name and price are required fields!!!");
+        }
+
+        const productImageLocalPath = req.file?.path;
+
+        if (!productImageLocalPath) {
+            throw new ApiError(400, "Product image is required!!!");
+        }
+
+        const productImageUrl = await uploadFileOncloudinary(productImageLocalPath);
+        console.log("productImageUrl", productImageUrl.secure_url);
+
+        if (!productImageUrl) {
+            throw new ApiError(500, "Failed to upload product image to cloudinary!!!");
+        }
+
+        const product = await Product.create({
+            name,
+            price,
+            description,
+            productImage: productImageUrl.secure_url,
+            categoryId
+        });
+
+        console.log("product created successfully", product);
+
+        if (!product) {
+            throw new ApiError(500, "Failed to create product!!!");
+        }
+
+        return res.status(201).json(new ApiResponse(201, product, "Product created successfully"));
+
+    } catch (error) {
+        throw new ApiError(500, error.message || "Failed to create product!!!");
     }
-    
-    const productImageLocalPath = req.file[0]?.productImage.path; 
 
-    if (!productImageLocalPath) {
-        throw new ApiError(400, "Product image is required!!!");
-    }
-
-    const productImageUrl = await uploadFileOncloudinary(productImageLocalPath);
-    
-    if (!productImageUrl) {
-        throw new ApiError(500, "Failed to upload product image to cloudinary!!!");
-    }
-
-    const product = await Product.create({
-        name,
-        price,
-        description,
-        productImage: productImageUrl,
-        categoryId
-    });
-
-    if (!product) {
-        throw new ApiError(500, "Failed to create product!!!");
-    }
-
-    return res.status(201).json(new ApiResponse(201, product, "Product created successfully"));
 })
 
 
 const getAllProducts = asyncHandler(async (req, res) => {
     try {
+        console.log("welcome to get all products controller");
         const options = {
             page: req.query.page || 1,
             limit: req.query.limit || 10
         };
 
-        const products = await Product.aggregatePaginate(Product.find(), options);
+        const aggregateProducts = Product.aggregate(); 
+
+        const products = await Product.aggregatePaginate(aggregateProducts, options);
+        // console.log("products fetched successfully", products);
 
         if (!products) {
             throw new ApiError(500, "Failed to fetch all products!!!");
@@ -62,7 +77,7 @@ const getAllProducts = asyncHandler(async (req, res) => {
 
         return res.status(200).json(new ApiResponse(200, products, "Products fetched successfully"));
     } catch (error) {
-        throw new ApiError(500, "Failed to fetch products!!!");
+        throw new ApiError(500, error.message || "Failed to fetch products!!!");
     }
 
 
@@ -193,6 +208,7 @@ const deleteProductById = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to delete product!!!");
     }
 })
+
 
 export {
     createProduct,
