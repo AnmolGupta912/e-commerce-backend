@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { CartItem } from "../models/cartItem.model.js";
+import mongoose from "mongoose";
 
 const createCartItem = asyncHandler(async (req, res) => {
     const cartId = req.params.cartId;
