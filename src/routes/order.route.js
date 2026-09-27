@@ -18,5 +18,3 @@ router.route('/update-order-status/:orderId').put(updateOrderStatus)
 router.route('/cancel-order/:orderId').delete(cancelOrder)
 
 export default router
-
-// not tested yet, but should work fine
