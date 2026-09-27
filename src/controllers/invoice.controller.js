@@ -3,16 +3,20 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {Invoice} from "../models/invoice.model.js";
 import { calculateOrderAmount } from "./payment.controller.js";
+import {nanoid} from "nanoid";
 
 const createInvoice = asyncHandler(async (req, res) => {
+    
     const orderId = req.params.orderId;
     const order = await calculateOrderAmount(orderId);
+    console.log("Order details for invoice creation:", order);
+
 
     const invoice = await Invoice.create({
         orderId,
-        invoiceNumber: `INV-${Date.now()}`,
-        amount: order[0].finalAmount,
-        taxAmount: order[0].taxAmount,
+        invoiceNumber: nanoid(), // Generate a unique invoice number
+        amount:  order?.total || 0,
+        taxAmount: order?.taxAmount || 0,
         issuedAt: new Date()
     });
 
