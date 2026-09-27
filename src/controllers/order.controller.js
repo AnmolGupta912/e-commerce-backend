@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Order } from "../models/order.model.js";
 import { CartItem } from "../models/cartItem.model.js";
 import { User } from "../models/user.model.js";
+import mongoose from "mongoose";
 
 const createOrder = asyncHandler(async (req, res) => {
   // get userId from request object
@@ -15,30 +16,48 @@ const createOrder = asyncHandler(async (req, res) => {
   // return order in response
 
   const userId = req.user?._id;
+  const cartId = req.params.cartId;
 
-  const user = await User.findById(userId).select("subscriptionId");
-  const cartItems = await CartItem.aggregate([
-    { $match: { userId: userId } },
+  const totalObject = await CartItem.aggregate([
+    {
+      $match: { cartId: new mongoose.Types.ObjectId(cartId) },
+    },
+    {
+      $lookup: {
+        from: "products",
+        localField: "productId",
+        foreignField: "_id",
+        as: "productInfo"
+      }
+    },
+    {
+      $unwind: "$productInfo"
+    },
     {
       $group: {
         _id: null,
-        total: { $sum: { $multiply: ["$quantity", "$price"] } },
-      },
+        total: { $sum: { $multiply: ["$quantity", "$productInfo.price" ] } },
+      }
     },
-  ]);
+    {
+      $project: {
+        _id: 0,
+        total: 1,
+      }
+    }
+  ])
 
-  if (!cartItems || cartItems.length === 0) {
-    throw new ApiError(404, "No cart items found for the user!!!");
-  }
+  const total = totalObject[0]?.total || 0;
 
-  // if user has a subscriptionId, apply a 10% discount to the total
-  const total = cartItems[0].total;
+  const user = await User.findById(userId);
 
   const order = await Order.create({
     userId,
-    total,
+    total: total,
     status: "pending",
-    subscriptionId: user.subscriptionId || undefined, // if user has a subscriptionId, add it to the order, else leave it undefined
+    placedAt: new Date(),
+    subscriptionId: user?.subscriptionId || undefined, 
+    // if user has a subscriptionId, add it to the order, else leave it undefined
   });
 
   if (!order) {
@@ -59,8 +78,21 @@ const getMyOrders = asyncHandler(async (req, res) => {
       limit: req.query.limit || 10,
     };
 
+    const AggregateOrder = Order.aggregate([
+      {
+        $match: { userId: new mongoose.Types.ObjectId(userId) },
+      },
+      {
+        $project: {
+          userId: 1,
+          total: 1,
+          status: 1,
+        }
+      }
+    ]);
+
     const orders = await Order.aggregatePaginate(
-      Order.find({ userId }),
+      AggregateOrder,
       options
     );
 
@@ -72,7 +104,7 @@ const getMyOrders = asyncHandler(async (req, res) => {
       .status(200)
       .json(new ApiResponse(200, orders, "Orders fetched successfully!!!"));
   } catch (error) {
-    throw new ApiError(500, "Failed to fetch orders!!!");
+    throw new ApiError(500, error.message ||"Failed to fetch orders!!!");
   }
 });
 
@@ -94,7 +126,28 @@ const getOrderById = asyncHandler(async (req, res) => {
 });
 
 
-const updateOrderStatus = asyncHandler(async (req, res) => {});
+const updateOrderStatus = asyncHandler(async (req, res) => {
+    const orderId = req.params.orderId;
+
+    if (!orderId) {
+        throw new ApiError(400, "orderId is required in the request params!!!");
+    }
+
+    const { status } = req.body;
+
+    if (!status) {
+        throw new ApiError(400, "status is required in the request body!!!");
+    }
+
+    const order = await Order.findByIdAndUpdate(orderId, { status }, { new: true });
+
+    if (!order) {
+        throw new ApiError(404, "Order not found!!!");
+    }
+
+    return res.status(200).json(new ApiResponse(200, order, "Order status updated successfully!!!"));
+
+});
 
 
 const cancelOrder = asyncHandler(async (req, res) => {

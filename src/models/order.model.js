@@ -1,5 +1,5 @@
 import mongoose, {Schema}  from "mongoose";
-
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const orderSchema = new Schema(
     {
@@ -13,7 +13,8 @@ const orderSchema = new Schema(
         },
         status: {
             type: String,
-            default: "pending"
+            default: "pending",
+            enum: ["pending", "completed", "cancelled"]
         },
         subscriptionId: {
             type: Schema.Types.ObjectId,
@@ -30,4 +31,5 @@ const orderSchema = new Schema(
     }
 )
 
+orderSchema.plugin(mongooseAggregatePaginate);
 export const Order = mongoose.model("Order", orderSchema)
