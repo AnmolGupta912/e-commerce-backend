@@ -76,7 +76,7 @@ const updateSellerProfile = asyncHandler(async (req, res) => {
     const { storeName, commissionRate } = req.body;
 
     const seller = await Seller.findOneAndUpdate(
-        userId,
+        { userId },
         {
             storeName,
             commissionRate
