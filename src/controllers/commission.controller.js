@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Commission } from "../models/commission.model.js";
-import { Seller } from "../models/selller.model.js";
+import { Seller } from "../models/seller.model.js";
 import { calculateOrderAmount } from "./payment.controller.js";
 
 
@@ -12,18 +12,30 @@ const calculateCommission = asyncHandler(async (req, res) => {
     const commissionRate = await Seller.findById(sellerId).select("commissionRate");
     const orderAmount = await calculateOrderAmount(orderId);
 
-    const commission = await Commission.create({
-        seller: sellerId,
-        order: orderId,
-        rate: commissionRate,
-        amount: orderAmount[0].finalAmount * (commissionRate / 100)
+    if (!sellerId && !orderId) {
+        throw new ApiError(400, "Bad request: Missing required parameters!!!");
+    }
+
+    console.log(sellerId, orderId, commissionRate, orderAmount);    
+    try{
+        const commission = await Commission.create({
+        sellerId,
+        orderId,
+        rate: commissionRate?.commissionRate || 0,
+        amount: orderAmount[0]?.finalAmount * (commissionRate / 100) || orderAmount.total || 0
     });
+    
 
     if (!commission) {
         throw new ApiError(500, "Failed to calculate commission!!!");
     }
 
     return res.status(201).json(new ApiResponse(201, commission, "Commission calculated successfully"));
+}
+    catch(err){
+        throw new ApiError(500, err.message ||"Failed to calculate commission!!!");
+    }
+
 })
 
 
