@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {Plan} from "../models/plan.model.js";
+import mongoose from "mongoose";
 
 
 const createPlan = asyncHandler(async (req, res) => {
