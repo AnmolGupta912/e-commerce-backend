@@ -11,4 +11,3 @@ const storage = multer.diskStorage({
 })
 
 export const uplaoder = multer({storage: storage})
-// console.log(uplaoder.storage.getDestination())

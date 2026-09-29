@@ -3,7 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Payout } from "../models/payout.model.js";
 import { calculateOrderAmount } from "./payment.controller.js";
-import { Seller } from "../models/selller.model.js";
+import { Seller } from "../models/seller.model.js";
+import mongoose from "mongoose";
 
 
 const createPayout = asyncHandler(async (req, res) => {
@@ -11,9 +12,10 @@ const createPayout = asyncHandler(async (req, res) => {
     const seller = await Seller.findById(sellerId).select("commissionRate");
 
     const orderAmount = await calculateOrderAmount(orderId);
+    console.log("Order amount after calculations:", orderAmount);
 
 
-    const amountToPayout = orderAmount[0].finalAmount - (orderAmount[0].finalAmount * (seller.commissionRate / 100));
+    const amountToPayout = orderAmount?.total - (orderAmount?.total * (seller.commissionRate / 100));
 
     const payout = await Payout.create({
         sellerId,
@@ -45,7 +47,7 @@ const getSellerPayouts = asyncHandler(async (req, res) => {
     const payouts = Payout.aggregate([
         {
             $match:{
-                sellerId: mongoose.Types.ObjectId(sellerId)
+                sellerId: new mongoose.Types.ObjectId(sellerId)
             }
         }
     ])
