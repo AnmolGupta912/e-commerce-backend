@@ -49,9 +49,9 @@ const updateReturnById = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Bad request: Missing required parameters!!!");
     }
 
-    if (!returnRequest) {
-        throw new ApiError(404, "Return request not found!!!");
-    }
+    // if (!returnRequest) {
+    //     throw new ApiError(404, "Return request not found!!!");
+    // }
 
     const returnItem = await Return.findByIdAndUpdate(returnId, { reason }, { new: true });
 
