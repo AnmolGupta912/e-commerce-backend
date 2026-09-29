@@ -3,20 +3,20 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {Payment} from "../models/payment.model.js";
 import {Order} from "../models/order.model.js";
+import mongoose from "mongoose";
+import { nanoid } from "nanoid";
 
-// createPayment()
-// getPaymentByOrder()
-// updatePaymentStatus()
+
 export const calculateOrderAmount = async (orderId) => {
     const order = await Order.aggregate([
         {
-            $match: { _id: mongoose.Types.ObjectId(orderId) }
+            $match: { _id: new mongoose.Types.ObjectId(orderId) }
         },
         {
             $set: {
                 discountAmount:{
                     $cond: {
-                        if: { $eq: ["$subscriptionId", { $exists: true }] },
+                        if: { $eq: ["$subscriptionId", null] }, // check if subscriptionId is not null
                         then: { $multiply: ["$totalAmount", 0.1] },
                         else: 0
                     }
@@ -36,22 +36,22 @@ export const calculateOrderAmount = async (orderId) => {
 const createPayment = asyncHandler(async (req, res) => {
     // const { orderId, amount, method, transactionId } = req.body;
 
-    const { method, transactionId } = req.body;
+    const { method } = req.body;
     const orderId = req.params.orderId;
 
     // apply discounts, taxes, and other calculations to the order amount before creating the payment
     const order = await calculateOrderAmount(orderId);
+    console.log("Order after calculations:", order);
 
-
-    if (!order[0]) {
+    if (!order) {
         throw new ApiError(404, "Order not found!!!");
     }
 
     const payment = await Payment.create({
         orderId,
-        amount: order[0].finalAmount,
+        amount: order?.total,
         method,
-        transactionId,
+        transactionId: nanoid(),
         paidAt: new Date()
     });
 
