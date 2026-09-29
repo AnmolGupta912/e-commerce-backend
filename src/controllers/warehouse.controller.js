@@ -41,7 +41,7 @@ const getAllWarehouses = asyncHandler(async (req, res) => {
 
 
 const getWarehouseById = asyncHandler(async (req, res) => {
-    const warehouseId = req.params.id;
+    const warehouseId = req.params.warehouseId;
 
     const warehouse = await Warehouse.findById(warehouseId);
 
@@ -55,7 +55,7 @@ const getWarehouseById = asyncHandler(async (req, res) => {
 
 
 const updateWarehouseById = asyncHandler(async (req, res) => {
-    const warehouseId = req.params.id;
+    const warehouseId = req.params.warehouseId;
     const { name, location } = req.body;
 
     if ([name, location].some((field) => field?.trim() === "")) {
@@ -79,7 +79,7 @@ const updateWarehouseById = asyncHandler(async (req, res) => {
 })
 
 const deleteWarehouseById = asyncHandler(async (req, res) => {
-    const warehouseId = req.params.id;
+    const warehouseId = req.params.warehouseId;
 
     const warehouse = await Warehouse.findByIdAndDelete(warehouseId);
     
