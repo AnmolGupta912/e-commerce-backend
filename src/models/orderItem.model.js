@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
-
-const orderItemSchema = Schema(
+const orderItemSchema = new Schema(
     {
         orderId: {
             type: Schema.Types.ObjectId,
@@ -26,5 +26,7 @@ const orderItemSchema = Schema(
         timestamps: true
     }
 );
+
+orderItemSchema.plugin(mongooseAggregatePaginate);
 
 export const OrderItem = mongoose.model("OrderItem", orderItemSchema);
