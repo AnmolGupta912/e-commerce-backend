@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {Subscription} from "../models/subscription.model.js";
+import mongoose from "mongoose";
 
 const subscribeToPlan = asyncHandler(async (req, res) => {
     const userId = req.user._id;
